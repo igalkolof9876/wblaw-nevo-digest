@@ -1,4 +1,4 @@
-אתה מריץ את routine nevo-digest-send בענן, עבור עורך דין יגאל קולודני. אין לך repo מקומי ואין דיסק מתמשך בין ריצות - הכל ארעי. אין לך כלי Artifact או ArtifactData בסביבה הזו - אל תנסה להשתמש בהם.
+אתה מריץ את routine nevo-digest-send בענן, עבור עורך דין יגאל קולודני. אין לך repo מקומי ואין דיסק מתמשך בין ריצות - הכל ארעי. אין לך כלי Artifact או ArtifactData בסביבה הזו - אל תנסה להשתמש בהם. אין לך גם טוקן GitHub - אל תנסה לכתוב ל-repo.
 
 1. הבא את קובצי הסקריפט בתחילת הריצה, ב-curl, מהכתובות הבאות ושמור אותם מקומית לפני שאתה מריץ אותם:
 https://raw.githubusercontent.com/igalkolof9876/wblaw-nevo-digest/main/scripts/nevo_collect.py
@@ -15,26 +15,24 @@ https://raw.githubusercontent.com/igalkolof9876/wblaw-nevo-digest/main/scripts/_
 https://raw.githubusercontent.com/igalkolof9876/wblaw-nevo-digest/main/docs/SKILL.md
 התעלם מכל הפניה שם לנתיבי repo מקומי, git, commit או push - הם לא רלוונטיים לריצה הזו, ראה סעיפים 3-5 למטה לגבי state בפועל.
 
-3. ה-state נשמר ב-repo עצמו, דרך GitHub Contents API - לא git, לא Artifact. משתנה הסביבה GH_TOKEN מכיל טוקן עם הרשאת כתיבה. לכל קריאת GET/PUT השתמש בכותרת: Authorization: Bearer $GH_TOKEN.
-א. קרא, GET, את https://api.github.com/repos/igalkolof9876/wblaw-nevo-digest/contents/state/seen.json - פענח את שדה content מ-base64, ושמור מקומית כ-JSON, ושמור גם את שדה ה-sha לשימוש בכתיבה בסוף הריצה.
-ב. נסה לקרוא, GET, את https://api.github.com/repos/igalkolof9876/wblaw-nevo-digest/contents/state/pending.json - תוצרי ריצת ה-collect שרצה כשעתיים קודם, 15:00 שעון ישראל. אם מתקבל 404, המשך בלי זה, אין תלות. שמור גם את ה-sha שלו אם הוא קיים, לשימוש במחיקה בסוף הריצה.
+3. ה-state נשמר בטיוטות Gmail ייעודיות, לא בקבצים מקומיים, לא ב-git ולא ב-Artifact:
+א. חפש, בעזרת list_drafts עם query subject:NEVO-DIGEST-STATE-SEEN, את טיוטת ה-seen. אם נמצאה - קרא אותה עם get_draft (שמור את ה-draftId שלה), ה-body הוא JSON של מיפוי vid לתאריך ולשם תיק. שמור מקומית כ-JSON. אם לא נמצאה - הבא ב-curl את https://raw.githubusercontent.com/igalkolof9876/wblaw-nevo-digest/main/state/seen.json כגיבוי לקריאה בלבד, ותכנן ליצור טיוטת seen חדשה בסוף הריצה.
+ב. חפש, בעזרת list_drafts עם query subject:NEVO-DIGEST-STATE-PENDING, את טיוטת ה-pending. אם נמצאה - קרא אותה עם get_draft (שמור את ה-draftId שלה) - אלה תוצרי ריצת ה-collect שרצה כשעתיים קודם, 15:00 שעון ישראל. אם לא נמצאה, המשך בלי זה, אין תלות.
 
 זוהי הריצה השנייה מבין שתיים ביום. בריצה זו:
 
-1. אם קיים pending.json, זו נקודת ההתחלה שלך - אין צורך לנתח מחדש פסקי דין שכבר שם.
-2. הרץ שוב את שלב האיסוף עם days-back וערך 1, כדי לתפוס פסיקה שהתפרסמה מאז ריצת ה-collect. דלג על vid-ים שכבר ב-pending.json, גם ברשימת items וגם ברשימת skipped - ראה האזהרה המפורשת ב-SKILL.md על עקביות דיווח, וגם דלג על vid-ים שכבר ב-seen.json.
+1. אם קיים תוכן pending, זו נקודת ההתחלה שלך - אין צורך לנתח מחדש פסקי דין שכבר שם.
+2. הרץ שוב את שלב האיסוף עם days-back וערך 1, כדי לתפוס פסיקה שהתפרסמה מאז ריצת ה-collect. דלג על vid-ים שכבר ב-pending, גם ברשימת items וגם ברשימת skipped - ראה האזהרה המפורשת ב-SKILL.md על עקביות דיווח, וגם דלג על vid-ים שכבר ב-seen.
 3. בצע סינון, הורדת טקסט וניתוח על מה שנוסף, בדיוק כמו ב-SKILL.md.
-4. מזג את pending.json עם מה שניתחת עכשיו, לפי מבנה שלב 5 ב-SKILL.md, לקובץ analyses.json מקומי.
+4. מזג את pending עם מה שניתחת עכשיו, לפי מבנה שלב 5 ב-SKILL.md, לקובץ analyses.json מקומי.
 5. בנה את המייל וה-Artifact לפי שלב 5 המלא ב-SKILL.md: build_email.py, פרסום Artifact עם prep_artifact.py (זהו כלי ה-Artifact הרגיל לפרסום דף - זמין, בניגוד ל-ArtifactData שלא זמין), ו-PDF עם pdf_render.py אחרי prep_print.py. זה לא נבדק עדיין בענן - אם הפגינציה או ה-RTL נראים שבורים דווח על כך בבירור בתשובתך הסופית, אך אל תיתקע - שלח בכל זאת את המייל עם קישור ה-Artifact של הדוח, זה הערוץ העיקרי, לא ה-PDF.
 6. בנה את מייל השער עם build_summary_email.py, בלי הדגל has-pdf, ושלח דרך Gmail MCP: נמען igalk@wblaw.co.il, נושא ותוכן לפי SKILL.md. שלח בפועל באמצעות send_message, לא טיוטה.
 
 אחרי מסירה מוצלחת בלבד:
-1. הכן גרסה מעודכנת של seen.json: מזג לתוכו את כל ה-vid-ים החדשים, גם מ-pending.json וגם מהניתוח הנוסף, במבנה מיפוי בין vid לאובייקט עם תאריך ושם התיק.
-2. כתוב אותה בחזרה, PUT, ל-https://api.github.com/repos/igalkolof9876/wblaw-nevo-digest/contents/state/seen.json עם content מקודד base64 ועם ה-sha ששמרת בשלב 3א למעלה (חובה, אחרת הכתיבה תידחה).
-3. מחק את state/pending.json, DELETE ל-https://api.github.com/repos/igalkolof9876/wblaw-nevo-digest/contents/state/pending.json עם גוף הבקשה {"message": "...", "sha": "<ה-sha ששמרת בשלב 3ב>"}.
+1. הכן גרסה מעודכנת: מזג לתוך ה-seen שקראת את כל ה-vid-ים החדשים, גם מ-pending וגם מהניתוח הנוסף, במבנה מיפוי בין vid לאובייקט עם תאריך ושם התיק.
+2. אם הייתה טיוטת seen קיימת - עדכן אותה עם update_draft, אותו נושא, body חדש. אם לא הייתה (ריצה ראשונה) - צור אותה עם create_draft, נושא "NEVO-DIGEST-STATE-SEEN".
+3. אם הייתה טיוטת pending - מחק אותה (יש כלי מחיקת טיוטה ב-Gmail MCP; אם אינו זמין, במקום למחוק, עדכן אותה עם update_draft לתוכן ריק כמו {"items": [], "skipped": []}).
 
-אם קריאת ה-API נכשלת בכל שלב (סטטוס שגיאה) - דווח על כך בבירור בתשובתך הסופית ואל תמשיך בשקט.
+אם המייל נכשל לשלוח, שגיאת Gmail MCP - אל תעדכן את טיוטת ה-seen ואל תמחק/תרוקן את טיוטת ה-pending, ודווח על השגיאה המדויקת בבירור. עדיף לדווח שוב על תיק מחר מאשר לאבד אותו בשקט.
 
-אם המייל נכשל לשלוח, שגיאת Gmail MCP - אל תעדכן את seen.json ואל תמחק את pending.json, ודווח על השגיאה המדויקת בבירור. עדיף לדווח שוב על תיק מחר מאשר לאבד אותו בשקט.
-
-אם לא נמצאה פסיקה רלוונטית כלל, גם לא ב-pending.json, שלח בכל זאת מייל קצר לפי מקרי קצה ב-SKILL.md, כדי שיגאל ידע שהמערכת פעלה - ועדיין עדכן ומחק את קבצי ה-state בהתאם.
+אם לא נמצאה פסיקה רלוונטית כלל, גם לא ב-pending, שלח בכל זאת מייל קצר לפי מקרי קצה ב-SKILL.md, כדי שיגאל ידע שהמערכת פעלה - ועדיין עדכן את טיוטות ה-state בהתאם.

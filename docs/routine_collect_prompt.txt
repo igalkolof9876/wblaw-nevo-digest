@@ -1,4 +1,4 @@
-אתה מריץ את routine nevo-digest-collect בענן, עבור עורך דין יגאל קולודני. אין לך repo מקומי ואין דיסק מתמשך בין ריצות - הכל ארעי. אין לך כלי Artifact או ArtifactData בסביבה הזו - אל תנסה להשתמש בהם.
+אתה מריץ את routine nevo-digest-collect בענן, עבור עורך דין יגאל קולודני. אין לך repo מקומי ואין דיסק מתמשך בין ריצות - הכל ארעי. אין לך כלי Artifact או ArtifactData בסביבה הזו - אל תנסה להשתמש בהם. אין לך גם טוקן GitHub - אל תנסה לכתוב ל-repo.
 
 1. הבא את קובצי הסקריפט בתחילת הריצה, ב-curl, מהכתובות הבאות ושמור אותם מקומית לפני שאתה מריץ אותם:
 https://raw.githubusercontent.com/igalkolof9876/wblaw-nevo-digest/main/scripts/nevo_collect.py
@@ -6,20 +6,18 @@ https://raw.githubusercontent.com/igalkolof9876/wblaw-nevo-digest/main/scripts/n
 
 2. קרא גם את קובץ ההוראות המלא מכאן, במלואו, ופעל לפיו:
 https://raw.githubusercontent.com/igalkolof9876/wblaw-nevo-digest/main/docs/SKILL.md
-זו ההוראה המחייבת לתחום, לסינון הנושאי, ולפרומפט הניתוח. התעלם מכל הפניה שם לנתיבי repo מקומי, git, commit או push - הם לא רלוונטיים לריצה הזו, ראה סעיף 4 למטה לגבי איך שומרים state בפועל.
+זו ההוראה המחייבת לתחום, לסינון הנושאי, ולפרומפט הניתוח. התעלם מכל הפניה שם לנתיבי repo מקומי, git, commit או push - הם לא רלוונטיים לריצה הזו, ראה סעיף 3 למטה לגבי איך שומרים state בפועל.
 
-3. ה-state (דדופליקציה) נשמר ב-repo עצמו, דרך GitHub Contents API - לא git, לא Artifact. משתנה הסביבה GH_TOKEN מכיל טוקן עם הרשאת כתיבה לקובץ הזה בלבד. קרא אותו עכשיו:
-curl -s -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" https://api.github.com/repos/igalkolof9876/wblaw-nevo-digest/contents/state/seen.json
-התשובה כוללת שדה content בקידוד base64 ושדה sha - שמור את שניהם. פענח את ה-content, ותקבל מיפוי בין vid לתאריך ולשם התיק, של כל פסקי הדין שכבר דווחו בעבר. שמור אותו מקומית כקובץ JSON כדי שהסקריפטים יוכלו להשתמש בו לסינון.
+3. ה-state (דדופליקציה) נשמר בטיוטת Gmail ייעודית, לא בקבצים מקומיים, לא ב-git ולא ב-Artifact:
+א. חפש, בעזרת list_drafts עם query בנוסח subject:NEVO-DIGEST-STATE-SEEN, טיוטה קיימת עם הנושא המדויק "NEVO-DIGEST-STATE-SEEN". אם נמצאה - קרא אותה עם get_draft, וה-body שלה הוא JSON: מיפוי בין vid לתאריך ולשם התיק, של כל פסקי הדין שכבר דווחו בעבר. שמור אותו מקומית כקובץ JSON כדי שהסקריפטים יוכלו להשתמש בו לסינון.
+ב. אם לא נמצאה טיוטה כזו (ריצה ראשונה בלבד) - זהו הגיבוי: הבא ב-curl את https://raw.githubusercontent.com/igalkolof9876/wblaw-nevo-digest/main/state/seen.json (קריאה בלבד, גישה פומבית, לא דורש טוקן) והשתמש בו כנקודת ההתחלה. במקרה הזה, גם צור עם create_draft טיוטה חדשה בשם "NEVO-DIGEST-STATE-SEEN" עם אותו תוכן כ-body, כדי שהריצות הבאות ימצאו אותה.
 
 זוהי הריצה הראשונה מבין שתיים ביום, 15:00 ו-17:00 שעון ישראל. בריצה זו בצע רק את שלבי האיסוף, הסינון הנושאי, הורדת הטקסט המלא, והניתוח, לפי docs/SKILL.md, על בסיס פלט nevo_collect.py עם הדגל days-back וערך 1 - וביום ראשון, או אם קובץ ה-seen שקראת לא עודכן כמה ימים, עם הערך 7 במקום.
 
-בסיום, כתוב את התוצאה כ-JSON, במבנה שבשלב 5 של SKILL.md. שמור אותה ב-repo באמצעות GitHub Contents API, PUT לנתיב state/pending.json:
-curl -s -X PUT -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" https://api.github.com/repos/igalkolof9876/wblaw-nevo-digest/contents/state/pending.json -d "{\"message\": \"collect <תאריך ISO>\", \"content\": \"<תוכן ה-JSON מקודד base64>\", \"sha\": \"<sha קיים אם pending.json כבר קיים, אחרת השמט את השדה>\"}"
-בדוק קודם אם state/pending.json כבר קיים (GET לאותו נתיב) כדי לדעת אם צריך sha. אם לא נמצאו פסקי דין רלוונטיים, כתוב שם רשימת items ריקה. אם נבו מחזירה שגיאה, רשום זאת תחת המפתח errors באותו קובץ - אל תשתוק.
+בסיום, כתוב את התוצאה כ-JSON, במבנה שבשלב 5 של SKILL.md. חפש, בעזרת list_drafts עם query subject:NEVO-DIGEST-STATE-PENDING, טיוטה קיימת בשם הזה. אם קיימת - עדכן אותה עם update_draft, ה-body החדש. אם לא קיימת - צור אותה עם create_draft, נושא "NEVO-DIGEST-STATE-PENDING", ו-body התוכן שכתבת. אם לא נמצאו פסקי דין רלוונטיים, כתוב שם רשימת items ריקה. אם נבו מחזירה שגיאה, רשום זאת תחת המפתח errors באותו תוכן - אל תשתוק.
 
-חשוב מאוד: אל תשלח מייל בריצה זו, ואל תעדכן את state/seen.json. ריצת ה-send, routine נפרד, כשעתיים מאוחר יותר, היא שתקרא את state/pending.json, תמזג אותו עם מה שהתפרסם בינתיים, ותשלח מייל אחד מאוחד.
+חשוב מאוד: אל תשלח מייל בריצה זו, ואל תעדכן את טיוטת ה-seen. ריצת ה-send, routine נפרד, כשעתיים מאוחר יותר, היא שתקרא את טיוטת ה-pending, תמזג אותה עם מה שהתפרסם בינתיים, ותשלח מייל אחד מאוחד.
 
-אם קריאת ה-API נכשלת (סטטוס שגיאה, לא 200/201) - דווח על כך בבירור בתשובתך הסופית ואל תמשיך בשקט.
+אם קריאת ה-API של Gmail נכשלת - דווח על כך בבירור בתשובתך הסופית ואל תמשיך בשקט.
 
 זהו סוף הריצה הזו.
