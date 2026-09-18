@@ -1,0 +1,27 @@
+אתה מריץ את routine "nevo-digest-send" בענן, עבור עו"ד יגאל קולודני. אתה כבר בתוך checkout טרי של ה-repo הפרטי wblaw-nevo-digest (igalkolof9876/wblaw-nevo-digest) - זו סביבת עבודה ארעית, אז כל state שצריך לשרוד לריצה הבאה חייב להיות מחויב (commit) ונדחף (push) חזרה ל-repo בסוף הריצה - זה לא אופציונלי.
+
+**קרא עכשיו את docs/SKILL.md במלואו** - זו ההוראה המלאה והמחייבת לרוטינה הזו. אחריו, קרא גם את README.md לרשימת "פערים ידועים".
+
+זוהי הריצה השנייה מבין שתיים ביום (אחרי ריצת collect שרצה כשעתיים קודם, 15:00 שעון ישראל). בריצה זו:
+
+1. בדוק אם קיים `state/pending.json` מריצת ה-collect של היום (כשעתיים אחורה). אם קיים - זו נקודת ההתחלה שלך: אין צורך לנתח מחדש פסקי דין שכבר שם.
+2. הרץ שוב את שלב 1 (איסוף) עם `--days-back 1` כדי לתפוס פסיקה שהתפרסמה מאז ריצת ה-collect. דלג על vid-ים שכבר ב-`state/pending.json` (גם ב-`items` וגם ב-`skipped` - ראה האזהרה המפורשת ב-SKILL.md על עקביות דיווח).
+3. בצע שלבים 2-4 (סינון, הורדת טקסט, ניתוח) על מה שנוסף, בדיוק כמו ב-SKILL.md.
+4. **מזג** את תוצאות ריצת ה-collect (מ-pending.json) עם מה שניתחת עכשיו, לפי מבנה שלב 5 ב-SKILL.md, ל-`state/analyses.json`.
+5. בנה את המייל וה-Artifact לפי שלב 5 המלא ב-SKILL.md: `build_email.py`, פרסום Artifact עם `prep_artifact.py`, ו-PDF עם `python scripts/pdf_render.py --in state/digest_print.html --out state/digest.pdf` (אחרי `prep_print.py`) - **לא נבדק עדיין בענן**, אם הפגינציה/ה-RTL נראים שבורים דווח על כך בבירור בתשובתך הסופית, אך אל תיתקע - שלח בכל זאת את המייל עם קישור ה-Artifact (זה הערוץ העיקרי, לא ה-PDF).
+6. בנה את מייל השער עם `build_summary_email.py` (בלי `--has-pdf`), ושלח דרך Gmail MCP: `to: igalk@wblaw.co.il`, נושא ותוכן לפי SKILL.md. **שלח בפועל (send_message), לא טיוטה.**
+
+**אחרי מסירה מוצלחת בלבד:**
+1. הוסף את כל ה-vid-ים (גם מ-pending.json, גם מהניתוח הנוסף) ל-`state/seen.json` בפורמט `{"<vid>": {"date": "<ISO>", "case": "<שם>"}}`.
+2. מחק את `state/pending.json`.
+3. ```
+   git add state/seen.json
+   git rm -f state/pending.json 2>/dev/null || true
+   git commit -m "send <תאריך ISO> - <מספר> פסקי דין"
+   git push
+   ```
+   אם ה-push נכשל - נסה `git pull --rebase` פעם אחת ואז push שוב. אם עדיין נכשל, דווח על השגיאה המדויקת בתשובתך הסופית - קריטי, כי בלעדי ה-commit הריצה הבאה תדווח שוב על אותם פסקי דין.
+
+אם המייל נכשל לשלוח (שגיאת Gmail MCP) - **אל תעדכן seen.json ואל תמחק pending.json**, ודווח על השגיאה המדויקת בבירור. עדיף לדווח שוב על תיק מחר מאשר לאבד אותו בשקט.
+
+אם לא נמצאה פסיקה רלוונטית כלל (גם לא ב-pending.json) - שלח בכל זאת מייל קצר לפי "מקרי קצה" ב-SKILL.md, כדי שיגאל ידע שהמערכת פעלה.
