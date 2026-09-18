@@ -1,6 +1,6 @@
-אתה מריץ את routine nevo-digest-collect בענן, עבור עורך דין יגאל קולודני. אין לך repo מקומי ואין דיסק מתמשך בין ריצות - הכל ארעי. לכן:
+אתה מריץ את routine nevo-digest-collect בענן, עבור עורך דין יגאל קולודני. אין לך repo מקומי ואין דיסק מתמשך בין ריצות - הכל ארעי. אין לך כלי Artifact או ArtifactData בסביבה הזו - אל תנסה להשתמש בהם.
 
-1. הבא את קובצי הסקריפט בתחילת הריצה, ב-WebFetch או curl, מהכתובות הבאות ושמור אותם מקומית לפני שאתה מריץ אותם:
+1. הבא את קובצי הסקריפט בתחילת הריצה, ב-curl, מהכתובות הבאות ושמור אותם מקומית לפני שאתה מריץ אותם:
 https://raw.githubusercontent.com/igalkolof9876/wblaw-nevo-digest/main/scripts/nevo_collect.py
 https://raw.githubusercontent.com/igalkolof9876/wblaw-nevo-digest/main/scripts/nevo_fetch_text.py
 
@@ -8,14 +8,18 @@ https://raw.githubusercontent.com/igalkolof9876/wblaw-nevo-digest/main/scripts/n
 https://raw.githubusercontent.com/igalkolof9876/wblaw-nevo-digest/main/docs/SKILL.md
 זו ההוראה המחייבת לתחום, לסינון הנושאי, ולפרומפט הניתוח. התעלם מכל הפניה שם לנתיבי repo מקומי, git, commit או push - הם לא רלוונטיים לריצה הזו, ראה סעיף 4 למטה לגבי איך שומרים state בפועל.
 
-3. ה-state (דדופליקציה) נשמר ב-Artifact פרטי, לא בקבצים מקומיים ולא ב-git. כתובת ה-Artifact:
-https://claude.ai/artifact/1u3egxkbWceXAFLKRss2yK
-קרא את המסמך seen באוסף seen (doc_id בשם index) בעזרת כלי ה-ArtifactData, פעולה get. הוא מכיל מיפוי בין vid לתאריך ולשם התיק, של כל פסקי הדין שכבר דווחו בעבר. שמור אותו מקומית כקובץ JSON כדי שהסקריפטים יוכלו להשתמש בו לסינון.
+3. ה-state (דדופליקציה) נשמר ב-repo עצמו, דרך GitHub Contents API - לא git, לא Artifact. משתנה הסביבה GH_TOKEN מכיל טוקן עם הרשאת כתיבה לקובץ הזה בלבד. קרא אותו עכשיו:
+curl -s -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" https://api.github.com/repos/igalkolof9876/wblaw-nevo-digest/contents/state/seen.json
+התשובה כוללת שדה content בקידוד base64 ושדה sha - שמור את שניהם. פענח את ה-content, ותקבל מיפוי בין vid לתאריך ולשם התיק, של כל פסקי הדין שכבר דווחו בעבר. שמור אותו מקומית כקובץ JSON כדי שהסקריפטים יוכלו להשתמש בו לסינון.
 
 זוהי הריצה הראשונה מבין שתיים ביום, 15:00 ו-17:00 שעון ישראל. בריצה זו בצע רק את שלבי האיסוף, הסינון הנושאי, הורדת הטקסט המלא, והניתוח, לפי docs/SKILL.md, על בסיס פלט nevo_collect.py עם הדגל days-back וערך 1 - וביום ראשון, או אם קובץ ה-seen שקראת לא עודכן כמה ימים, עם הערך 7 במקום.
 
-בסיום, כתוב את התוצאה כ-JSON, במבנה שבשלב 5 של SKILL.md, ושמור אותה בעזרת ArtifactData, פעולה set, לאוסף pending, doc_id בשם today, באותו Artifact שלמעלה. אם לא נמצאו פסקי דין רלוונטיים, כתוב שם רשימת items ריקה. אם נבו מחזירה שגיאה, רשום זאת תחת המפתח errors באותו מסמך - אל תשתוק.
+בסיום, כתוב את התוצאה כ-JSON, במבנה שבשלב 5 של SKILL.md. שמור אותה ב-repo באמצעות GitHub Contents API, PUT לנתיב state/pending.json:
+curl -s -X PUT -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" https://api.github.com/repos/igalkolof9876/wblaw-nevo-digest/contents/state/pending.json -d "{\"message\": \"collect <תאריך ISO>\", \"content\": \"<תוכן ה-JSON מקודד base64>\", \"sha\": \"<sha קיים אם pending.json כבר קיים, אחרת השמט את השדה>\"}"
+בדוק קודם אם state/pending.json כבר קיים (GET לאותו נתיב) כדי לדעת אם צריך sha. אם לא נמצאו פסקי דין רלוונטיים, כתוב שם רשימת items ריקה. אם נבו מחזירה שגיאה, רשום זאת תחת המפתח errors באותו קובץ - אל תשתוק.
 
-חשוב מאוד: אל תשלח מייל בריצה זו, ואל תעדכן את מסמך ה-seen. ריצת ה-send, routine נפרד, כשעתיים מאוחר יותר, היא שתקרא את מסמך pending/today, תמזג אותו עם מה שהתפרסם בינתיים, ותשלח מייל אחד מאוחד.
+חשוב מאוד: אל תשלח מייל בריצה זו, ואל תעדכן את state/seen.json. ריצת ה-send, routine נפרד, כשעתיים מאוחר יותר, היא שתקרא את state/pending.json, תמזג אותו עם מה שהתפרסם בינתיים, ותשלח מייל אחד מאוחד.
+
+אם קריאת ה-API נכשלת (סטטוס שגיאה, לא 200/201) - דווח על כך בבירור בתשובתך הסופית ואל תמשיך בשקט.
 
 זהו סוף הריצה הזו.
