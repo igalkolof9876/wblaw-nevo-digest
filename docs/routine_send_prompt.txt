@@ -1,22 +1,40 @@
-אתה מריץ את routine nevo-digest-send בענן, עבור עורך דין יגאל קולודני. אתה כבר בתוך checkout טרי של ה-repo הפרטי wblaw-nevo-digest (igalkolof9876/wblaw-nevo-digest) - זו סביבת עבודה ארעית, אז כל state שצריך לשרוד לריצה הבאה חייב להיות מחויב ונדחף חזרה ל-repo בסוף הריצה - זה לא אופציונלי.
+אתה מריץ את routine nevo-digest-send בענן, עבור עורך דין יגאל קולודני. אין לך repo מקומי ואין דיסק מתמשך בין ריצות - הכל ארעי. לכן:
 
-קרא עכשיו את docs/SKILL.md במלואו - זו ההוראה המלאה והמחייבת לרוטינה הזו. אחריו, קרא גם את README.md לרשימת פערים ידועים.
+1. הבא את קובצי הסקריפט בתחילת הריצה, ב-WebFetch או curl, מהכתובות הבאות ושמור אותם מקומית לפני שאתה מריץ אותם:
+https://raw.githubusercontent.com/igalkolof9876/wblaw-nevo-digest/main/scripts/nevo_collect.py
+https://raw.githubusercontent.com/igalkolof9876/wblaw-nevo-digest/main/scripts/nevo_fetch_text.py
+https://raw.githubusercontent.com/igalkolof9876/wblaw-nevo-digest/main/scripts/build_email.py
+https://raw.githubusercontent.com/igalkolof9876/wblaw-nevo-digest/main/scripts/build_summary_email.py
+https://raw.githubusercontent.com/igalkolof9876/wblaw-nevo-digest/main/scripts/prep_artifact.py
+https://raw.githubusercontent.com/igalkolof9876/wblaw-nevo-digest/main/scripts/prep_print.py
+https://raw.githubusercontent.com/igalkolof9876/wblaw-nevo-digest/main/scripts/pdf_render.py
+https://raw.githubusercontent.com/igalkolof9876/wblaw-nevo-digest/main/scripts/_assemble.py
+https://raw.githubusercontent.com/igalkolof9876/wblaw-nevo-digest/main/scripts/_plain_body.py
 
-זוהי הריצה השנייה מבין שתיים ביום, אחרי ריצת collect שרצה כשעתיים קודם, 15:00 שעון ישראל. בריצה זו:
+2. קרא גם את קובץ ההוראות המלא מכאן, במלואו, ופעל לפיו:
+https://raw.githubusercontent.com/igalkolof9876/wblaw-nevo-digest/main/docs/SKILL.md
+התעלם מכל הפניה שם לנתיבי repo מקומי, git, commit או push - הם לא רלוונטיים לריצה הזו, ראה סעיפים 3-5 למטה לגבי state בפועל.
 
-1. בדוק אם קיים state/pending.json מריצת ה-collect של היום. אם קיים, זו נקודת ההתחלה שלך, אין צורך לנתח מחדש פסקי דין שכבר שם.
-2. הרץ שוב את שלב 1, איסוף, עם days-back וערך 1, כדי לתפוס פסיקה שהתפרסמה מאז ריצת ה-collect. דלג על vid-ים שכבר ב-state/pending.json, גם ב-items וגם ב-skipped, ראה האזהרה המפורשת ב-SKILL.md על עקביות דיווח.
-3. בצע שלבים 2 עד 4, סינון, הורדת טקסט, ניתוח, על מה שנוסף, בדיוק כמו ב-SKILL.md.
-4. מזג את תוצאות ריצת ה-collect, מ-pending.json, עם מה שניתחת עכשיו, לפי מבנה שלב 5 ב-SKILL.md, לקובץ state/analyses.json.
-5. בנה את המייל וה-Artifact לפי שלב 5 המלא ב-SKILL.md: build_email.py, פרסום Artifact עם prep_artifact.py, ו-PDF עם scripts/pdf_render.py לתוך state/digest.pdf, אחרי prep_print.py. זה לא נבדק עדיין בענן - אם הפגינציה או ה-RTL נראים שבורים דווח על כך בבירור בתשובתך הסופית, אך אל תיתקע - שלח בכל זאת את המייל עם קישור ה-Artifact, זה הערוץ העיקרי, לא ה-PDF.
+3. ה-state נשמר ב-Artifact פרטי, לא בקבצים מקומיים ולא ב-git. כתובת ה-Artifact:
+https://claude.ai/artifact/1u3egxkbWceXAFLKRss2yK
+בעזרת כלי ה-ArtifactData:
+א. קרא, פעולה get, את המסמך seen/index - מיפוי vid לתאריך ולשם תיק של כל מה שדווח בעבר. שמור מקומית כ-JSON.
+ב. נסה לקרוא, פעולה get, את המסמך pending/today - תוצרי ריצת ה-collect שרצה כשעתיים קודם, 15:00 שעון ישראל. אם הוא לא קיים, המשך בלי זה, אין תלות.
+
+זוהי הריצה השנייה מבין שתיים ביום. בריצה זו:
+
+1. אם קיים pending/today, זו נקודת ההתחלה שלך - אין צורך לנתח מחדש פסקי דין שכבר שם.
+2. הרץ שוב את שלב האיסוף עם days-back וערך 1, כדי לתפוס פסיקה שהתפרסמה מאז ריצת ה-collect. דלג על vid-ים שכבר ב-pending/today, גם ברשימת items וגם ברשימת skipped - ראה האזהרה המפורשת ב-SKILL.md על עקביות דיווח, וגם דלג על vid-ים שכבר ב-seen/index.
+3. בצע סינון, הורדת טקסט וניתוח על מה שנוסף, בדיוק כמו ב-SKILL.md.
+4. מזג את pending/today עם מה שניתחת עכשיו, לפי מבנה שלב 5 ב-SKILL.md, לקובץ analyses.json מקומי.
+5. בנה את המייל וה-Artifact לפי שלב 5 המלא ב-SKILL.md: build_email.py, פרסום Artifact נפרד וחדש עם prep_artifact.py (זה Artifact אחר, לא מאגר ה-state), ו-PDF עם pdf_render.py אחרי prep_print.py. זה לא נבדק עדיין בענן - אם הפגינציה או ה-RTL נראים שבורים דווח על כך בבירור בתשובתך הסופית, אך אל תיתקע - שלח בכל זאת את המייל עם קישור ה-Artifact של הדוח, זה הערוץ העיקרי, לא ה-PDF.
 6. בנה את מייל השער עם build_summary_email.py, בלי הדגל has-pdf, ושלח דרך Gmail MCP: נמען igalk@wblaw.co.il, נושא ותוכן לפי SKILL.md. שלח בפועל באמצעות send_message, לא טיוטה.
 
 אחרי מסירה מוצלחת בלבד:
-1. הוסף את כל ה-vid-ים, גם מ-pending.json וגם מהניתוח הנוסף, ל-state/seen.json במבנה מיפוי בין vid לאובייקט עם תאריך ושם התיק.
-2. מחק את state/pending.json.
-3. הרץ בזה אחר זה: git add state/seen.json, git rm בכוח על state/pending.json אם קיים, git commit עם הודעה send ותאריך ISO ומספר פסקי הדין, ואחר כך git push.
-אם ה-push נכשל, נסה git pull עם דגל rebase פעם אחת ואז push שוב. אם עדיין נכשל, דווח על השגיאה המדויקת בתשובתך הסופית - קריטי, כי בלעדי ה-commit הריצה הבאה תדווח שוב על אותם פסקי דין.
+1. הכן גרסה מעודכנת של מסמך seen/index: מזג לתוכו את כל ה-vid-ים החדשים, גם מ-pending/today וגם מהניתוח הנוסף, במבנה מיפוי בין vid לאובייקט עם תאריך ושם התיק.
+2. כתוב אותה בעזרת ArtifactData, פעולה set, לאותו מסמך seen/index באותו Artifact.
+3. מחק את מסמך pending/today בעזרת ArtifactData, פעולה delete.
 
-אם המייל נכשל לשלוח, שגיאת Gmail MCP, אל תעדכן seen.json ואל תמחק pending.json, ודווח על השגיאה המדויקת בבירור. עדיף לדווח שוב על תיק מחר מאשר לאבד אותו בשקט.
+אם המייל נכשל לשלוח, שגיאת Gmail MCP - אל תעדכן את seen/index ואל תמחק את pending/today, ודווח על השגיאה המדויקת בבירור. עדיף לדווח שוב על תיק מחר מאשר לאבד אותו בשקט.
 
-אם לא נמצאה פסיקה רלוונטית כלל, גם לא ב-pending.json, שלח בכל זאת מייל קצר לפי מקרי קצה ב-SKILL.md, כדי שיגאל ידע שהמערכת פעלה.
+אם לא נמצאה פסיקה רלוונטית כלל, גם לא ב-pending/today, שלח בכל זאת מייל קצר לפי מקרי קצה ב-SKILL.md, כדי שיגאל ידע שהמערכת פעלה - ועדיין עדכן ומחק את מסמכי ה-state בהתאם.
